@@ -33,7 +33,7 @@ function getOperationResult(n1, n2, operator) {
   }
 }
 
-function main() {
+let calculator = (function () {
   const screen = document.querySelector("div#screen");
   const displayables = Array.from(document.querySelectorAll("button.displayable:not(.punct)"));
   const decimal = document.querySelector("button.punct");
@@ -47,8 +47,6 @@ function main() {
   let operation;
   let refreshNext;
   let recentEquals;
-
-  initContext();
 
   function initContext() {
     operation = {};
@@ -171,59 +169,66 @@ function main() {
     }
   }
 
-  displayables.forEach(btn => btn.addEventListener("click", displayOnScreen));
-
-  del.addEventListener("click", () => {
-    if (recentEquals) {
-      initContext();
-    }
-    if (hasLeftOperand()) { 
-      if (!hasOperator()) {
-        operation[LEFT] = deleteLastDigit(operation[LEFT]);
-      } else {
-        if (hasRightOperand()) {
-          operation[RIGHT] = deleteLastDigit(operation[RIGHT]);
-        }
-      }
-    }
-  });
-
-  clear.addEventListener("click", () => { initContext(); });
-
-  operators.forEach(btn => btn.addEventListener("click", setOperator));
-
-  equals.addEventListener("click", () => {
-    if (isFullyDefinedOperation()) {
-      currify();
-    }
-  });
-
-  decimal.addEventListener("click", putDecimal);
-
-  document.addEventListener("keydown", function (e) {
-    const key = e.key;
-    if (key >= "0" && key <= "9") {
-      const displayable = findButton(displayables, `${key}`);
-      displayable.textContent = `${key}`;
-      displayable.click();
-    } else if (key === ".") {
-      decimal.textContent = `${key}`;
-      decimal.click();
-    } else if (key === "+" || key === "-" || key === "*" || key === "/") {
-      const op = findButton(operators, `\\${key}`);
-      op.click();
-    } else if (key === "Enter") {
-      equals.click();
-    } else if (key === "Backspace") {
-      del.click();
-    } else if (key === "Escape") {
-      clear.click();
-    }
-  });
-
   function findButton(buttons, matchable) {
     return buttons.filter(btn => btn.textContent.match(matchable))[0];
   }
-}
 
-main();
+  return {
+    main: function() {
+      initContext();
+    
+      displayables.forEach(btn => btn.addEventListener("click", displayOnScreen));
+    
+      del.addEventListener("click", () => {
+        if (recentEquals) {
+          initContext();
+        }
+        if (hasLeftOperand()) { 
+          if (!hasOperator()) {
+            operation[LEFT] = deleteLastDigit(operation[LEFT]);
+          } else {
+            if (hasRightOperand()) {
+              operation[RIGHT] = deleteLastDigit(operation[RIGHT]);
+            }
+          }
+        }
+      });
+    
+      clear.addEventListener("click", () => { initContext(); });
+    
+      operators.forEach(btn => btn.addEventListener("click", setOperator));
+    
+      equals.addEventListener("click", () => {
+        if (isFullyDefinedOperation()) {
+          currify();
+        }
+      });
+    
+      decimal.addEventListener("click", putDecimal);
+    
+      document.addEventListener("keydown", function (e) {
+        const key = e.key;
+        if (key >= "0" && key <= "9") {
+          const displayable = findButton(displayables, `${key}`);
+          displayable.textContent = `${key}`;
+          displayable.click();
+        } else if (key === ".") {
+          decimal.textContent = `${key}`;
+          decimal.click();
+        } else if (key === "+" || key === "-" || key === "*" || key === "/") {
+          const op = findButton(operators, `\\${key}`);
+          op.click();
+        } else if (key === "Enter") {
+          equals.click();
+        } else if (key === "Backspace") {
+          del.click();
+        } else if (key === "Escape") {
+          clear.click();
+        }
+      });
+    }
+  }
+
+})();
+
+calculator.main();
