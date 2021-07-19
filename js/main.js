@@ -35,14 +35,12 @@ function getOperationResult(n1, n2, operator) {
 
 function main() {
   const screen = document.querySelector("div#screen");
-
   const displayables = Array.from(document.querySelectorAll("button.displayable:not(.punct)"));
   const decimal = document.querySelector("button.punct");
   const del = document.querySelector("button#delete");
   const clear = document.querySelector("button#clear");
   const operators = Array.from(document.querySelectorAll("button.operator"));
   const equals = document.querySelector("button#equals");
-
   const RIGHT = "right";
   const LEFT = "left";
   const OPERATOR = "operator";
@@ -118,8 +116,8 @@ function main() {
 
   function concatDecimal(verifyOperand, operation, e) {
     if (!hasDecimal() && verifyOperand() && operation !== "") {
-      operation += e.currentTarget.textContent;
-      screen.textContent += e.currentTarget.textContent;
+      operation = operation.concat(e.currentTarget.textContent);
+      screen.textContent = screen.textContent.concat(e.currentTarget.textContent);
     }
     return operation;
   }
@@ -129,7 +127,7 @@ function main() {
       screen.textContent = "";
       refreshNext = false;
     }
-    screen.textContent += e.currentTarget.textContent;
+    screen.textContent = screen.textContent.concat(e.currentTarget.textContent);
     if (!hasOperator()) {
       if (!hasLeftOperand()) {
         operation[LEFT] = e.currentTarget.textContent;
@@ -139,14 +137,14 @@ function main() {
           screen.textContent = e.currentTarget.textContent;
           recentEquals = false;
         } else {
-          operation[LEFT] += e.currentTarget.textContent;
+          operation[LEFT] = operation[LEFT].concat(e.currentTarget.textContent);
         }
       }
     } else {
       if (!hasRightOperand()) {
         operation[RIGHT] = e.currentTarget.textContent;
       } else {
-        operation[RIGHT] += e.currentTarget.textContent;
+        operation[RIGHT] = operation[RIGHT].concat(e.currentTarget.textContent);
       }
     }
   }
@@ -190,9 +188,7 @@ function main() {
     }
   });
 
-  clear.addEventListener("click", () => {
-    initContext();
-  });
+  clear.addEventListener("click", () => { initContext(); });
 
   operators.forEach(btn => btn.addEventListener("click", setOperator));
 
@@ -225,8 +221,8 @@ function main() {
     }
   });
 
-  function findButton(buttons, matcheable) {
-    return buttons.filter(btn => btn.textContent.match(matcheable))[0];
+  function findButton(buttons, matchable) {
+    return buttons.filter(btn => btn.textContent.match(matchable))[0];
   }
 }
 
