@@ -1,111 +1,44 @@
 *, *::before, *::after {
   box-sizing: border-box;
+  user-select: none;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: normal;
-  user-select: none;
 }
 
 body {
-  padding: 0;
   margin: 0;
+  padding: 0;
   background-color: rgb(199, 199, 199);
 }
-
-#multiplication {
-  grid-area: multiplication;
+button {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  background-color: rgb(150, 148, 162);
+  border-radius: 5% 5% 20% 20%;
+  color:rgb(240, 240, 250);
 }
 
-#division {
-  grid-area: division;
-}
-
-#addition {
-  grid-area: addition;
-}
-
-#subtraction {
-  grid-area: subtraction;
-}
-
-#decimal {
-  grid-area: decimal;
-}
-
-#equals {
-  grid-area: equals;
-}
-
-#zero {
-  grid-area: zero;
-}
-
-#one {
-  grid-area: one;
-}
-
-#two {
-  grid-area: two;
-}
-
-#three {
-  grid-area: three;
-}
-
-#four {
-  grid-area: four;
-}
-
-#five {
-  grid-area: five;
-}
-
-#six {
-  grid-area: six;
-}
-
-#seven {
-  grid-area: seven;
-}
-
-#eight {
-  grid-area: eight;
-}
-
-#nine {
-  grid-area: nine;
-}
-
-#delete {
-  grid-area: delete;
-}
-
-#clear {
-  grid-area: clear;
-}
-
-#delete,
-#clear {
-  background-color: rgb(159, 78, 101);
-}
-
-#delete:hover,
-#clear:hover {
-  background-color: rgb(139, 69, 89);
-}
-
+#multiplication { grid-area: multiplication; }
+#division { grid-area: division; }
+#addition { grid-area: addition; }
+#subtraction { grid-area: subtraction; }
+#decimal { grid-area: decimal; }
+#equals { grid-area: equals; }
+#zero { grid-area: zero; }
+#one { grid-area: one; }
+#two { grid-area: two; }
+#three { grid-area: three; }
+#four { grid-area: four; }
+#five { grid-area: five; }
+#six { grid-area: six; }
+#seven { grid-area: seven; }
+#eight { grid-area: eight; }
+#nine { grid-area: nine; }
+#delete { grid-area: delete; }
+#clear { grid-area: clear; }
 #calc-body {
-  position: fixed;
-  padding: 2vh;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: rgb(70, 70, 70);
-  height: 55vh;
-  width: 50vh;
-  border-radius: 20px;
   display: grid;
-  grid-template-columns: repeat(5, minmax(1vh, 1fr));
-  grid-template-rows: repeat(5, 1fr);
   grid-gap: 1vh;
   grid-template-areas:
       "screen screen screen screen screen"
@@ -113,54 +46,56 @@ body {
       "four five six multiplication division"
       "one two three addition subtraction"
       ". zero decimal equals equals";
+  grid-template-columns: repeat(5, minmax(1vh, 1fr));
+  grid-template-rows: repeat(5, 1fr);
+  height: 55vh;
+  left: 50%;
+  padding: 2vh;
+  position: fixed;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 50vh;
+  background-color: rgb(70, 70, 70);
+  border-radius: 20px;
   font-size: 3vh;
 }
-
-/* .shadow {
-  box-shadow: inset 0 0 10px #000000;
-} */
-
-.shadow {
-  -moz-box-shadow: inset 0 0 10px #000000;
-  -webkit-box-shadow: inset 0 0 10px #000000;
-  box-shadow: inset 0 0 10px #000000;
+#delete,
+#clear {
+  background-color: rgb(159, 78, 101);
+}
+#screen {
+  align-items: center;
+  display: flex;
+  flex-direction: row-reverse;
+  grid-area: screen;
+  height: 10vh;
+  overflow: hidden;
+  padding: 2vh;
+  background-color: rgb(142, 153, 119);
+  border-radius: 10px;
+  border-style: ridge;
+  border-width: thin;
+  font-size: 3.8vh;
 }
 
 .inner-shadow {
   box-shadow: inset 0px 0px 20px rgba(0,0,0,0.9);
 }
-
-button {
-  border-radius: 5% 5% 20% 20%;
-  background-color: rgb(150, 148, 162);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color:rgb(240, 240, 250);
-}
-
-#screen {
-  background-color: rgb(142, 153, 119);
-  grid-area: screen;
-  height: 10vh;
-  border-radius: 10px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: row-reverse;
-  align-items: center;
-  padding: 2vh;
-  font-size: 3.8vh;
-  border-style: ridge;
-  border-width: thin;
+.shadow {
+  box-shadow: inset 0 0 10px #000000;
+  -moz-box-shadow: inset 0 0 10px #000000;
+  -webkit-box-shadow: inset 0 0 10px #000000;
 }
 
 button:hover {
   background-color: rgb(130, 129, 139);
 }
-
 button:active {
-  /* box-shadow: 0 5px #666; */
   transform: translateY(1px);
+}
+#delete:hover,
+#clear:hover {
+  background-color: rgb(139, 69, 89);
 }
 
 @media screen and (max-width: 280px) {
@@ -169,7 +104,6 @@ button:active {
     width: 40vh;
   }
 }
-
 @media screen and (min-height: 812px) {
   #calc-body {
     width: 45vh;
