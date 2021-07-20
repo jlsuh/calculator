@@ -33,7 +33,11 @@ function getOperationResult(n1, n2, operator) {
   }
 }
 
-let calculator = (function () {
+function Operation() {
+  
+}
+
+function Calculator() {
   const screen = document.querySelector("div#screen");
   const displayables = Array.from(document.querySelectorAll("button.displayable:not(.punct)"));
   const decimal = document.querySelector("button.punct");
@@ -48,14 +52,14 @@ let calculator = (function () {
   let refreshNext;
   let recentEquals;
 
-  function initContext() {
+  this.initContext = function() {
     operation = {};
     refreshNext = true;
     recentEquals = false;
     screen.textContent = "0";
   }
 
-  function deleteLastDigit(operand) {
+  this.deleteLastDigit = function(operand) {
     if (operand !== undefined) {
       operand = operand.slice(0, -1);
       screen.textContent = screen.textContent.slice(0, -1);
@@ -67,37 +71,37 @@ let calculator = (function () {
     return operand;
   }
 
-  function hasDecimal() {
+  this.hasDecimal = function() {
     return screen.textContent.includes(".");
   }
 
-  function hasProperty(operand, operation) {
+  this.hasProperty = function(operand, operation) {
     return operand in operation;
   }
 
-  function hasLeftOperand() {
+  this.hasLeftOperand = function() {
     return hasProperty(LEFT, operation);
   }
 
-  function hasRightOperand() {
+  this.hasRightOperand = function() {
     return hasProperty(RIGHT, operation);
   }
 
-  function hasOperator() {
+  this.hasOperator = function() {
     return hasProperty(OPERATOR, operation);
   }
 
-  function isFullyDefinedOperation() {
+  this.isFullyDefinedOperation = function() {
     return hasLeftOperand()
       && hasRightOperand()
       && hasOperator();
   }
 
-  function isDivideByZero() {
+  this.isDivideByZero = function() {
     return operation[OPERATOR] === "/" && operation[RIGHT] === "0";
   }
 
-  function currify() {
+  this.currify = function() {
     if (isDivideByZero()) {
       screen.textContent = "Divide by zero";
       operation = {};
@@ -112,7 +116,7 @@ let calculator = (function () {
     }
   }
 
-  function concatDecimal(verifyOperand, operation, e) {
+  this.concatDecimal = function(verifyOperand, operation, e) {
     if (!hasDecimal() && verifyOperand() && operation !== "") {
       operation = operation.concat(e.currentTarget.textContent);
       screen.textContent = screen.textContent.concat(e.currentTarget.textContent);
@@ -120,7 +124,7 @@ let calculator = (function () {
     return operation;
   }
 
-  function displayOnScreen(e) {
+  this.displayOnScreen = function(e) {
     if (refreshNext) {
       screen.textContent = "";
       refreshNext = false;
@@ -147,7 +151,7 @@ let calculator = (function () {
     }
   }
 
-  function setOperator(e) {
+  this.setOperator = function(e) {
     if (hasLeftOperand() && !hasRightOperand()) {
       operation[OPERATOR] = e.currentTarget.textContent;
     } else if (isFullyDefinedOperation()) {
@@ -157,7 +161,7 @@ let calculator = (function () {
     refreshNext = true;
   }
 
-  function putDecimal(e) {
+  this.putDecimal = function(e) {
     if (!hasOperator() && !recentEquals) {
       if (hasLeftOperand()) {
         operation[LEFT] = concatDecimal(hasLeftOperand, operation[LEFT], e);
@@ -169,66 +173,64 @@ let calculator = (function () {
     }
   }
 
-  function findButton(buttons, matchable) {
+  this.findButton = function(buttons, matchable) {
     return buttons.filter(btn => btn.textContent.match(matchable))[0];
   }
 
-  return {
-    main: function() {
-      initContext();
-    
-      displayables.forEach(btn => btn.addEventListener("click", displayOnScreen));
-    
-      del.addEventListener("click", () => {
-        if (recentEquals) {
-          initContext();
-        }
-        if (hasLeftOperand()) { 
-          if (!hasOperator()) {
-            operation[LEFT] = deleteLastDigit(operation[LEFT]);
-          } else {
-            if (hasRightOperand()) {
-              operation[RIGHT] = deleteLastDigit(operation[RIGHT]);
-            }
+  this.main = function() {
+    this.initContext();
+  
+    displayables.forEach(btn => btn.addEventListener("click", this.displayOnScreen));
+  
+    del.addEventListener("click", () => {
+      if (recentEquals) {
+        initContext();
+      }
+      if (hasLeftOperand()) { 
+        if (!hasOperator()) {
+          operation[LEFT] = deleteLastDigit(operation[LEFT]);
+        } else {
+          if (hasRightOperand()) {
+            operation[RIGHT] = deleteLastDigit(operation[RIGHT]);
           }
         }
-      });
-    
-      clear.addEventListener("click", () => { initContext(); });
-    
-      operators.forEach(btn => btn.addEventListener("click", setOperator));
-    
-      equals.addEventListener("click", () => {
-        if (isFullyDefinedOperation()) {
-          currify();
-        }
-      });
-    
-      decimal.addEventListener("click", putDecimal);
-    
-      document.addEventListener("keydown", function (e) {
-        const key = e.key;
-        if (key >= "0" && key <= "9") {
-          const displayable = findButton(displayables, `${key}`);
-          displayable.textContent = `${key}`;
-          displayable.click();
-        } else if (key === ".") {
-          decimal.textContent = `${key}`;
-          decimal.click();
-        } else if (key === "+" || key === "-" || key === "*" || key === "/") {
-          const op = findButton(operators, `\\${key}`);
-          op.click();
-        } else if (key === "Enter") {
-          equals.click();
-        } else if (key === "Backspace") {
-          del.click();
-        } else if (key === "Escape") {
-          clear.click();
-        }
-      });
-    }
+      }
+    });
+  
+    clear.addEventListener("click", () => { this.initContext(); });
+  
+    operators.forEach(btn => btn.addEventListener("click", this.setOperator));
+  
+    equals.addEventListener("click", () => {
+      if (isFullyDefinedOperation()) {
+        currify();
+      }
+    });
+  
+    decimal.addEventListener("click", this.putDecimal);
+  
+    document.addEventListener("keydown", function (e) {
+      const key = e.key;
+      if (key >= "0" && key <= "9") {
+        const displayable = findButton(displayables, `${key}`);
+        displayable.textContent = `${key}`;
+        displayable.click();
+      } else if (key === ".") {
+        decimal.textContent = `${key}`;
+        decimal.click();
+      } else if (key === "+" || key === "-" || key === "*" || key === "/") {
+        const op = findButton(operators, `\\${key}`);
+        op.click();
+      } else if (key === "Enter") {
+        equals.click();
+      } else if (key === "Backspace") {
+        del.click();
+      } else if (key === "Escape") {
+        clear.click();
+      }
+    });
   }
+}
 
-})();
-
+const calculator = new Calculator();
 calculator.main();
