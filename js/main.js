@@ -1,65 +1,54 @@
 "use strict";
 
-function addition(n1, n2) {
-  return n1 + n2;
-}
-
-function subtraction(n1, n2) {
-  return n1 - n2;
-}
-
-function multiplication(n1, n2) {
-  return n1 * n2;
-}
-
-function division(n1, n2) {
-  return n1 / n2;
-}
-
-function operate(n1, n2, operator) {
-  return operator(n1, n2);
-}
-
-function getOperationResult(n1, n2, operator) {
-  switch (operator) {
+let MathOperator = function(left, right, operator) {
+  this.left = left;
+  this.right = right;
+  this.operator = operator;
+};
+MathOperator.prototype.addition = function() {return this.left + this.right;}
+MathOperator.prototype.subtraction = function() {return this.left - this.right;}
+MathOperator.prototype.multiplication = function() {return this.left * this.right;}
+MathOperator.prototype.division = function() {return this.left / this.right;}
+MathOperator.prototype.getOperationResult = function() {
+  switch (this.operator) {
     case "+":
-      return operate(n1, n2, addition);
+      return this.addition();
     case "-":
-      return operate(n1, n2, subtraction);
+      return this.subtraction();
     case "*":
-      return operate(n1, n2, multiplication);
+      return this.multiplication();
     case "/":
-      return operate(n1, n2, division);
+      return this.division();
   }
 }
 
-function Operation() {
-  
-}
+function Operation() {}
+Operation.prototype.isDivideByZero = function() {return this.operator === "/" && this.right === "0";}
+Operation.prototype.isFullyDefinedOperation = function() {return this.hasLeftOperand() && this.hasRightOperand() && this.hasOperator();}
+Operation.prototype.hasLeftOperand = function() {return "left" in this;}
+Operation.prototype.hasRightOperand = function() {return "right" in this;}
+Operation.prototype.hasOperator = function() {return "operator" in this;}
 
-function Calculator() {
-  const screen = document.querySelector("div#screen");
+let calculator = (function () {
   const displayables = Array.from(document.querySelectorAll("button.displayable:not(.punct)"));
+  const operators = Array.from(document.querySelectorAll("button.operator"));
+  const clear = document.querySelector("button#clear");
   const decimal = document.querySelector("button.punct");
   const del = document.querySelector("button#delete");
-  const clear = document.querySelector("button#clear");
-  const operators = Array.from(document.querySelectorAll("button.operator"));
   const equals = document.querySelector("button#equals");
-  const RIGHT = "right";
-  const LEFT = "left";
-  const OPERATOR = "operator";
+  const screen = document.querySelector("div#screen");
   let operation;
-  let refreshNext;
   let recentEquals;
+  let refreshNext;
 
-  this.initContext = function() {
-    operation = {};
+  function initContext() {
+    operation = new Operation();
     refreshNext = true;
     recentEquals = false;
     screen.textContent = "0";
   }
 
-  this.deleteLastDigit = function(operand) {
+  function deleteLastDigit(operand) {
     if (operand !== undefined) {
       operand = operand.slice(0, -1);
       screen.textContent = screen.textContent.slice(0, -1);
@@ -71,166 +60,140 @@ function Calculator() {
     return operand;
   }
 
-  this.hasDecimal = function() {
-    return screen.textContent.includes(".");
-  }
+  function hasDecimal() { return screen.textContent.includes("."); }
 
-  this.hasProperty = function(operand, operation) {
-    return operand in operation;
-  }
-
-  this.hasLeftOperand = function() {
-    return hasProperty(LEFT, operation);
-  }
-
-  this.hasRightOperand = function() {
-    return hasProperty(RIGHT, operation);
-  }
-
-  this.hasOperator = function() {
-    return hasProperty(OPERATOR, operation);
-  }
-
-  this.isFullyDefinedOperation = function() {
-    return hasLeftOperand()
-      && hasRightOperand()
-      && hasOperator();
-  }
-
-  this.isDivideByZero = function() {
-    return operation[OPERATOR] === "/" && operation[RIGHT] === "0";
-  }
-
-  this.currify = function() {
-    if (isDivideByZero()) {
+  function currify() {
+    if (operation.isDivideByZero()) {
       screen.textContent = "Divide by zero";
-      operation = {};
+      operation = new Operation();
       refreshNext = true;
       recentEquals = false;
     } else {
-      let result = "" + getOperationResult(+operation.left, +operation.right, operation.operator);
+      let result = "" + new MathOperator(+operation.left, +operation.right, operation.operator).getOperationResult();
       screen.textContent = result;
-      operation = {};
-      operation[LEFT] = result;
+      operation = new Operation();
+      operation.left = result;
       recentEquals = true;
     }
   }
 
-  this.concatDecimal = function(verifyOperand, operation, e) {
-    if (!hasDecimal() && verifyOperand() && operation !== "") {
+  function concatDecimal(operation, e) {
+    if (!hasDecimal() && operation !== "") {
       operation = operation.concat(e.currentTarget.textContent);
       screen.textContent = screen.textContent.concat(e.currentTarget.textContent);
     }
     return operation;
   }
 
-  this.displayOnScreen = function(e) {
+  function displayOnScreen(e) {
     if (refreshNext) {
       screen.textContent = "";
       refreshNext = false;
     }
     screen.textContent = screen.textContent.concat(e.currentTarget.textContent);
-    if (!hasOperator()) {
-      if (!hasLeftOperand()) {
-        operation[LEFT] = e.currentTarget.textContent;
+    if (!operation.hasOperator()) {
+      if (!operation.hasLeftOperand()) {
+        operation.left = e.currentTarget.textContent;
       } else {
         if (recentEquals) {
-          operation[LEFT] = e.currentTarget.textContent;
+          operation.left = e.currentTarget.textContent;
           screen.textContent = e.currentTarget.textContent;
           recentEquals = false;
         } else {
-          operation[LEFT] = operation[LEFT].concat(e.currentTarget.textContent);
+          operation.left = operation.left.concat(e.currentTarget.textContent);
         }
       }
     } else {
-      if (!hasRightOperand()) {
-        operation[RIGHT] = e.currentTarget.textContent;
+      if (!operation.hasRightOperand()) {
+        operation.right = e.currentTarget.textContent;
       } else {
-        operation[RIGHT] = operation[RIGHT].concat(e.currentTarget.textContent);
+        operation.right = operation.right.concat(e.currentTarget.textContent);
       }
     }
   }
 
-  this.setOperator = function(e) {
-    if (hasLeftOperand() && !hasRightOperand()) {
-      operation[OPERATOR] = e.currentTarget.textContent;
-    } else if (isFullyDefinedOperation()) {
+  function setOperator(e) {
+    if (operation.hasLeftOperand() && !operation.hasRightOperand()) {
+      operation.operator = e.currentTarget.textContent;
+    } else if (operation.isFullyDefinedOperation()) {
       currify();
-      operation[OPERATOR] = e.currentTarget.textContent;
+      operation.operator = e.currentTarget.textContent;
     }
     refreshNext = true;
   }
 
-  this.putDecimal = function(e) {
-    if (!hasOperator() && !recentEquals) {
-      if (hasLeftOperand()) {
-        operation[LEFT] = concatDecimal(hasLeftOperand, operation[LEFT], e);
+  function putDecimal(e) {
+    if (!operation.hasOperator() && !recentEquals) {
+      if (operation.hasLeftOperand()) {
+        operation.left = concatDecimal(operation.left, e);
       }
     } else {
-      if (hasRightOperand()) {
-        operation[RIGHT] = concatDecimal(hasLeftOperand, operation[RIGHT], e);
+      if (operation.hasRightOperand()) {
+        operation.right = concatDecimal(operation.right, e);
       }
     }
   }
 
-  this.findButton = function(buttons, matchable) {
+  function findButton(buttons, matchable) {
     return buttons.filter(btn => btn.textContent.match(matchable))[0];
   }
 
-  this.main = function() {
-    this.initContext();
-  
-    displayables.forEach(btn => btn.addEventListener("click", this.displayOnScreen));
-  
-    del.addEventListener("click", () => {
-      if (recentEquals) {
-        initContext();
-      }
-      if (hasLeftOperand()) { 
-        if (!hasOperator()) {
-          operation[LEFT] = deleteLastDigit(operation[LEFT]);
-        } else {
-          if (hasRightOperand()) {
-            operation[RIGHT] = deleteLastDigit(operation[RIGHT]);
+  return {
+    main: function() {
+      initContext();
+
+      displayables.forEach(btn => btn.addEventListener("click", displayOnScreen));
+
+      del.addEventListener("click", () => {
+        if (operation.hasLeftOperand()) { 
+          if (!operation.hasOperator()) {
+            if(!recentEquals) {
+              operation.left = deleteLastDigit(operation.left);
+            } else {
+              initContext();
+            }
+          } else {
+            if (operation.hasRightOperand()) {
+              operation.right = deleteLastDigit(operation.right);
+            }
           }
         }
-      }
-    });
-  
-    clear.addEventListener("click", () => { this.initContext(); });
-  
-    operators.forEach(btn => btn.addEventListener("click", this.setOperator));
-  
-    equals.addEventListener("click", () => {
-      if (isFullyDefinedOperation()) {
-        currify();
-      }
-    });
-  
-    decimal.addEventListener("click", this.putDecimal);
-  
-    document.addEventListener("keydown", function (e) {
-      const key = e.key;
-      if (key >= "0" && key <= "9") {
-        const displayable = findButton(displayables, `${key}`);
-        displayable.textContent = `${key}`;
-        displayable.click();
-      } else if (key === ".") {
-        decimal.textContent = `${key}`;
-        decimal.click();
-      } else if (key === "+" || key === "-" || key === "*" || key === "/") {
-        const op = findButton(operators, `\\${key}`);
-        op.click();
-      } else if (key === "Enter") {
-        equals.click();
-      } else if (key === "Backspace") {
-        del.click();
-      } else if (key === "Escape") {
-        clear.click();
-      }
-    });
-  }
-}
+      });
 
-const calculator = new Calculator();
+      clear.addEventListener("click", () => { initContext(); });
+
+      operators.forEach(btn => btn.addEventListener("click", setOperator));
+
+      equals.addEventListener("click", () => {
+        if (operation.isFullyDefinedOperation()) {
+          currify();
+        }
+      });
+
+      decimal.addEventListener("click", putDecimal);
+
+      document.addEventListener("keydown", function (e) {
+        const key = e.key;
+        if (key >= "0" && key <= "9") {
+          const displayable = findButton(displayables, `${key}`);
+          displayable.textContent = `${key}`;
+          displayable.click();
+        } else if (key === ".") {
+          decimal.textContent = `${key}`;
+          decimal.click();
+        } else if (key === "+" || key === "-" || key === "*" || key === "/") {
+          const op = findButton(operators, `\\${key}`);
+          op.click();
+        } else if (key === "Enter") {
+          equals.click();
+        } else if (key === "Backspace") {
+          del.click();
+        } else if (key === "Escape") {
+          clear.click();
+        }
+      });
+    }
+  }
+})();
+
 calculator.main();
